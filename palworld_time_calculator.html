@@ -1,0 +1,632 @@
+<html lang="en" class="">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Palworld Day/Night Calculator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class'
+      };
+    </script>
+    <style>
+      /* Custom styles for elements not easily handled by Tailwind classes alone */
+      /* Textarea resizing */
+      textarea {
+        resize: vertical;
+      }
+
+      /* Toggle switch base styles (structural, not color) */
+      /* Corrected selector: target .toggle-circle as a descendant of .toggle-label */
+      .toggle-checkbox:checked + .toggle-label .toggle-circle {
+        transform: translateX(1.5rem); /* Moves the circle to the right */
+      }
+
+      /* Loading spinner animation (structural, not color) */
+      .loader {
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        vertical-align: middle;
+        margin-left: 0.5rem;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+    </style>
+
+  </head>
+  <body
+    class="flex items-center justify-center min-h-screen p-4 font-sans bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300"
+  >
+    <div
+      class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-2xl"
+    >
+      <!-- Theme Toggle -->
+      <div class="flex justify-end mb-4">
+        <label for="themeToggle" class="flex items-center cursor-pointer">
+          <!-- Sun Icon (Light mode default, Dark mode variant) -->
+          <svg
+            class="h-6 w-6 text-amber-500 dark:text-amber-300 transition-colors duration-300"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 3v1m0 16v1m9-9h1M3 12H2m15.325-6.675l.707-.707M6.675 17.325l-.707.707M18 18l-.707-.707M6.675 6.675l-.707-.707M12 15a3 3 0 100-6 3 3 0 000 6z"
+            ></path>
+          </svg>
+          <div class="relative ml-3 mr-3">
+            <input
+              type="checkbox"
+              id="themeToggle"
+              class="sr-only toggle-checkbox"
+            />
+            <!-- The toggle-label now contains the toggle-circle -->
+            <div
+              class="block w-10 h-6 rounded-full bg-gray-400 dark:bg-gray-700 transition-colors duration-300 toggle-label"
+            >
+              <div
+                class="dot absolute left-1 top-1 w-4 h-4 rounded-full bg-white dark:bg-gray-300 transition-transform duration-300 toggle-circle"
+              ></div>
+            </div>
+          </div>
+          <!-- Moon Icon (Light mode default, Dark mode variant) -->
+          <svg
+            class="h-6 w-6 text-gray-700 dark:text-gray-400 transition-colors duration-300"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9 9 0 008.354-5.646z"
+            ></path>
+          </svg>
+        </label>
+      </div>
+
+      <h1
+        class="text-3xl font-bold text-center mb-6 text-blue-600 dark:text-blue-400 transition-colors duration-300"
+      >
+        Palworld Day/Night Calculator
+      </h1>
+
+      <div class="mb-4">
+        <label
+          for="dayLength"
+          class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2 transition-colors duration-300"
+        >
+          Desired Day Length (minutes):
+        </label>
+        <input
+          type="number"
+          id="dayLength"
+          value="26.5"
+          min="1"
+          step="0.1"
+          class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-900 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:border-blue-700 dark:focus:border-blue-500 transition-colors duration-300"
+          placeholder="e.g., 26.5"
+        />
+      </div>
+
+      <div class="mb-6">
+        <label
+          for="nightLength"
+          class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2 transition-colors duration-300"
+        >
+          Desired Night Length (minutes):
+        </label>
+        <input
+          type="number"
+          id="nightLength"
+          value="5.5"
+          min="1"
+          step="0.1"
+          class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-900 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:border-blue-700 dark:focus:border-blue-500 transition-colors duration-300"
+          placeholder="e.g., 5.5"
+        />
+      </div>
+
+      <button
+        id="calculateBtn"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105"
+      >
+        Calculate .ini Settings
+      </button>
+
+      <div
+        class="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 transition-colors duration-300"
+      >
+        <h2
+          class="text-gray-800 dark:text-gray-200 text-xl font-semibold mb-3 transition-colors duration-300"
+        >
+          Output for PalWorldSettings.ini:
+        </h2>
+        <textarea
+          id="output"
+          readonly=""
+          class="w-full p-3 bg-gray-200 dark:bg-gray-900 text-emerald-600 dark:text-green-400 font-mono text-sm rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none cursor-text transition-colors duration-300 min-h-[100px]"
+        ></textarea>
+        <button
+          id="copyBtn"
+          class="mt-4 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105"
+        >
+          Copy to Clipboard
+        </button>
+        <p
+          id="copyMessage"
+          class="text-center text-sm text-emerald-500 dark:text-green-300 mt-2 hidden transition-colors duration-300"
+        >
+          Copied!
+        </p>
+      </div>
+
+      <p
+        class="text-gray-600 dark:text-gray-400 text-xs mt-6 text-center transition-colors duration-300"
+      >
+        *Assumes default Palworld Day: 26.5 mins, Night: 5.5 mins.
+      </p>
+
+      <!-- Section: How the Calculation Works -->
+      <div
+        class="mt-8 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 transition-colors duration-300"
+      >
+        <h2
+          class="text-gray-800 dark:text-gray-200 text-xl font-semibold mb-3 transition-colors duration-300"
+        >
+          How the Calculation Works
+        </h2>
+        <p
+          class="text-gray-700 dark:text-gray-300 text-sm mb-2 transition-colors duration-300"
+        >
+          The `DayTimeSpeedRate` and `NightTimeSpeedRate` values in Palworld's
+          `.ini` file are inverse multipliers. This means that to make a day or
+          night shorter, you need a higher speed rate. Conversely, to make it
+          longer, you need a lower speed rate.
+        </p>
+        <p
+          class="text-gray-700 dark:text-gray-300 text-sm mb-2 transition-colors duration-300"
+        >
+          The formula used is:
+        </p>
+        <p
+          class="text-emerald-600 dark:text-green-400 font-mono text-sm bg-gray-200 dark:bg-gray-900 p-2 rounded-lg mb-2 transition-colors duration-300"
+        >
+          DayTimeSpeedRate = Default Day Duration / Desired Day Duration
+        </p>
+        <p
+          class="text-emerald-600 dark:text-green-400 font-mono text-sm bg-gray-200 dark:bg-gray-900 p-2 rounded-lg transition-colors duration-300"
+        >
+          NightTimeSpeedRate = Default Night Duration / Desired Night Duration
+        </p>
+        <p
+          class="text-gray-700 dark:text-gray-300 text-sm mt-2 transition-colors duration-300"
+        >
+          For example, if the default day is 26.5 minutes and you want a
+          13.25-minute day:
+          <br />
+          DayTimeSpeedRate = 26.5 / 13.25 = 2.0
+        </p>
+      </div>
+
+      <!-- Section: Predefined Time Examples -->
+      <div
+        class="mt-8 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 transition-colors duration-300"
+      >
+        <h2
+          class="text-gray-800 dark:text-gray-200 text-xl font-semibold mb-3 transition-colors duration-300"
+        >
+          Predefined Time Examples
+        </h2>
+        <table class="min-w-full border-collapse mt-4">
+          <thead>
+            <tr>
+              <th
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-gray-200 dark:bg-gray-800 font-bold text-gray-700 dark:text-gray-300 transition-colors duration-300"
+              >
+                Desired Day (mins)
+              </th>
+              <th
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-gray-200 dark:bg-gray-800 font-bold text-gray-700 dark:text-gray-300 transition-colors duration-300"
+              >
+                Desired Night (mins)
+              </th>
+              <th
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-gray-200 dark:bg-gray-800 font-bold text-gray-700 dark:text-gray-300 transition-colors duration-300"
+              >
+                DayTimeSpeedRate
+              </th>
+              <th
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-gray-200 dark:bg-gray-800 font-bold text-gray-700 dark:text-gray-300 transition-colors duration-300"
+              >
+                NightTimeSpeedRate
+              </th>
+            </tr>
+          </thead>
+          <tbody id="examplesTableBody">
+            <tr>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                26.5
+              </td>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                5.5
+              </td>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                1.000000
+              </td>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                1.000000
+              </td>
+            </tr>
+
+            <tr>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                13.25
+              </td>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                2.75
+              </td>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                2.000000
+              </td>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                2.000000
+              </td>
+            </tr>
+
+            <tr>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                53
+              </td>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                11
+              </td>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                0.500000
+              </td>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                0.500000
+              </td>
+            </tr>
+
+            <tr>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                26.5
+              </td>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                1
+              </td>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                1.000000
+              </td>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                5.500000
+              </td>
+            </tr>
+
+            <tr>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                5
+              </td>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                5.5
+              </td>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                5.300000
+              </td>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                1.000000
+              </td>
+            </tr>
+
+            <tr>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                30
+              </td>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                3
+              </td>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                0.883333
+              </td>
+              <td
+                class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+              >
+                1.833333
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Download Option -->
+      <div
+        class="mt-8 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 text-center transition-colors duration-300"
+      >
+        <p
+          class="text-gray-700 dark:text-gray-300 text-sm mb-4 transition-colors duration-300"
+        >
+          You can download this script to use it offline or host it yourself.
+          Using the online version helps support this site and ensures you
+          always have the latest updates.
+        </p>
+        <button
+          id="downloadBtn"
+          class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6 mr-2"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            ></path>
+          </svg>
+          Download Script
+        </button>
+      </div>
+    </div>
+
+    <script>
+      // Get references to HTML elements
+      const body = document.body; // No longer directly used for theme, but kept for consistency
+      const themeToggle = document.getElementById("themeToggle");
+      const dayLengthInput = document.getElementById("dayLength");
+      const nightLengthInput = document.getElementById("nightLength");
+      const calculateBtn = document.getElementById("calculateBtn");
+      const outputTextarea = document.getElementById("output");
+      const copyBtn = document.getElementById("copyBtn");
+      const copyMessage = document.getElementById("copyMessage");
+      const downloadBtn = document.getElementById("downloadBtn");
+      const examplesTableBody = document.getElementById("examplesTableBody");
+
+      // Define default game time values in minutes
+      // These are the commonly accepted default values for Palworld.
+      const defaultDayMinutes = 26.5;
+      const defaultNightMinutes = 5.5;
+
+      /**
+       * Calculates the DayTimeSpeedRate and NightTimeSpeedRate based on desired lengths.
+       * The formula is: SpeedRate = DefaultDuration / DesiredDuration
+       * A higher SpeedRate makes the time pass faster (shorter duration).
+       */
+      function calculateRates(desiredDayMinutes, desiredNightMinutes) {
+        // Validate input: ensure values are positive numbers
+        if (
+          isNaN(desiredDayMinutes) ||
+          desiredDayMinutes <= 0 ||
+          isNaN(desiredNightMinutes) ||
+          desiredNightMinutes <= 0
+        ) {
+          return {
+            daySpeedRate: "Invalid Input",
+            nightSpeedRate: "Invalid Input",
+            outputString:
+              "Please enter valid positive numbers for both day and night lengths.",
+          };
+        }
+
+        // Calculate the speed rates
+        // Using toFixed(6) for precision, as game settings often require it
+        const daySpeedRate = (defaultDayMinutes / desiredDayMinutes).toFixed(6);
+        const nightSpeedRate = (
+          defaultNightMinutes / desiredNightMinutes
+        ).toFixed(6);
+
+        // Construct the output string for PalWorldSettings.ini
+        const outputString = `DayTimeSpeedRate=${daySpeedRate}\nNightTimeSpeedRate=${nightSpeedRate}`;
+
+        return { daySpeedRate, nightSpeedRate, outputString };
+      }
+
+      /**
+       * Handles the calculation and display for the main calculator inputs.
+       */
+      function handleCalculateBtnClick() {
+        const desiredDayMinutes = parseFloat(dayLengthInput.value);
+        const desiredNightMinutes = parseFloat(nightLengthInput.value);
+        const { outputString } = calculateRates(
+          desiredDayMinutes,
+          desiredNightMinutes,
+        );
+        outputTextarea.value = outputString;
+      }
+
+      /**
+       * Copies the content of the output textarea to the clipboard.
+       * Provides visual feedback to the user.
+       */
+      function copyToClipboard() {
+        // Select the text in the output textarea
+        outputTextarea.select();
+        outputTextarea.setSelectionRange(0, 99999); // For mobile devices
+
+        try {
+          // Execute the copy command
+          document.execCommand("copy");
+          // Show a "Copied!" message
+          copyMessage.classList.remove("hidden");
+          // Hide the message after a short delay
+          setTimeout(() => {
+            copyMessage.classList.add("hidden");
+          }, 2000); // 2 seconds
+        } catch (err) {
+          // Fallback for browsers where document.execCommand('copy') might not work
+          console.error("Failed to copy text: ", err);
+          copyMessage.textContent = "Failed to copy. Please copy manually.";
+          copyMessage.classList.remove("hidden");
+          setTimeout(() => {
+            copyMessage.classList.add("hidden");
+            copyMessage.textContent = "Copied!"; // Reset message
+          }, 3000);
+        }
+      }
+
+      /**
+       * Triggers the download of the current HTML content as a file.
+       */
+      function downloadHtmlFile() {
+        // Get the entire HTML content of the document
+        const htmlContent = document.documentElement.outerHTML;
+        // Create a Blob from the HTML content with HTML mime type
+        const blob = new Blob([htmlContent], { type: "text/html" });
+        // Create a temporary URL for the Blob
+        const url = URL.createObjectURL(blob);
+
+        // Create a temporary anchor element
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "palworld_time_calculator.html"; // Set the desired file name
+        document.body.appendChild(a); // Append to body (required for Firefox)
+        a.click(); // Programmatically click the anchor to trigger download
+        document.body.removeChild(a); // Clean up the temporary anchor
+        URL.revokeObjectURL(url); // Revoke the object URL to free up memory
+      }
+
+      /**
+       * Populates the examples table with predefined scenarios.
+       */
+      function populateExamplesTable() {
+        const examples = [
+          { day: 26.5, night: 5.5 }, // Default values
+          { day: 13.25, night: 2.75 }, // Half day/night (2x speed)
+          { day: 53.0, night: 11.0 }, // Double day/night (0.5x speed)
+          { day: 26.5, night: 1.0 }, // Default day, very short night
+          { day: 5.0, night: 5.5 }, // Very short day, default night
+          { day: 30.0, night: 3.0 }, // Slightly longer day, shorter night
+        ];
+
+        examplesTableBody.innerHTML = ""; // Clear existing rows
+
+        examples.forEach((example) => {
+          const { daySpeedRate, nightSpeedRate } = calculateRates(
+            example.day,
+            example.night,
+          );
+          const row = `
+                      <tr>
+                          <td class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">${example.day}</td>
+                          <td class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">${example.night}</td>
+                          <td class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">${daySpeedRate}</td>
+                          <td class="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">${nightSpeedRate}</td>
+                      </tr>
+                  `;
+          examplesTableBody.insertAdjacentHTML("beforeend", row);
+        });
+      }
+
+      /**
+       * Toggles between light and dark mode.
+       */
+      function toggleTheme() {
+        if (document.documentElement.classList.contains("dark")) {
+          document.documentElement.classList.remove("dark");
+          localStorage.setItem("theme", "light");
+        } else {
+          document.documentElement.classList.add("dark");
+          localStorage.setItem("theme", "dark");
+        }
+      }
+
+      /**
+       * Applies the saved theme on page load.
+       */
+      function applySavedTheme() {
+        const savedTheme = localStorage.getItem("theme");
+        // If theme is explicitly saved, use that. Otherwise, check system preference.
+        if (
+          savedTheme === "dark" ||
+          (!savedTheme &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches)
+        ) {
+          document.documentElement.classList.add("dark");
+          themeToggle.checked = true; // Check toggle for dark mode
+        } else {
+          document.documentElement.classList.remove("dark");
+          themeToggle.checked = false; // Uncheck toggle for light mode
+        }
+      }
+
+      // Add event listeners
+      calculateBtn.addEventListener("click", handleCalculateBtnClick);
+      copyBtn.addEventListener("click", copyToClipboard);
+      downloadBtn.addEventListener("click", downloadHtmlFile);
+      themeToggle.addEventListener("change", toggleTheme);
+
+      // Initial setup when the page loads
+      window.onload = function () {
+        applySavedTheme();
+        handleCalculateBtnClick();
+        populateExamplesTable();
+      };
+    </script>
+  </body>
+</html>
