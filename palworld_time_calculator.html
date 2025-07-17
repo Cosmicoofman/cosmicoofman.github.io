@@ -49,6 +49,33 @@
   <body
     class="flex items-center justify-center min-h-screen p-4 font-sans bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300"
   >
+  <button
+  id="backButton"
+  class="fixed top-4 right-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-full shadow-lg transition-all duration-300 ease-in-out
+         flex items-center space-x-2 z-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+  onclick="goBack()"
+>
+  <!-- Left arrow icon from Lucide React (simulated with SVG for HTML) -->
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left">
+      <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
+  </svg>
+  <span>Back</span>
+</button>
+
+<script>
+  /**
+   * @file This script handles the navigation functionality for the "Back" button.
+   */
+
+  /**
+   * Navigates the user back to the previous page in their browser's history.
+   * This function is called when the "Back" button is clicked.
+   */
+  function goBack() {
+      // history.back() is a standard browser API that navigates to the previous page.
+      history.back();
+  }
+</script>
     <div
       class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-2xl"
     >
