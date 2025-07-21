@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PalWorldSettings.ini Editor</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    };
+  </script>
+  <style>
+    .toggle-checkbox:checked + .toggle-label .toggle-circle {
+      transform: translateX(1.0rem);
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+  </style>
+</head>
+<body class="bg-white dark:bg-gray-900 text-black dark:text-gray-100 min-h-screen flex flex-col">
+  <a href="./index.html" class="fixed top-4 right-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-full shadow-lg transition-all duration-300 ease-in-out flex items-center space-x-2 z-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 no-underline">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left">
+      <path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path>
+    </svg>
+    <span>Back</span>
+  </a>
+
+  <div class="container mx-auto p-6 flex-grow">
+    <div class="flex justify-end mb-4">
+      <label for="themeToggle" class="flex items-center cursor-pointer">
+        <svg class="h-6 w-6 text-amber-500 dark:text-amber-300 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h1M3 12H2m15.325-6.675l.707-.707M6.675 17.325l-.707.707M18 18l-.707-.707M6.675 6.675l-.707-.707M12 15a3 3 0 100-6 3 3 0 000 6z"/>
+        </svg>
+        <div class="relative ml-3 mr-3">
+          <input type="checkbox" id="themeToggle" class="sr-only toggle-checkbox">
+          <div class="block w-10 h-6 rounded-full bg-gray-400 dark:bg-gray-700 transition-colors duration-300 toggle-label">
+            <div class="dot absolute left-1 top-1 w-4 h-4 rounded-full bg-white dark:bg-gray-300 transition-transform duration-300 toggle-circle"></div>
+          </div>
+        </div>
+        <svg class="h-6 w-6 text-gray-700 dark:text-gray-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9 9 0 008.354-5.646z"/>
+        </svg>
+      </label>
+    </div>
+
+    <h1 class="text-4xl font-bold text-center mb-10 text-blue-600 dark:text-blue-400">PalWorldSettings.ini Editor</h1>
+
+    <div class="bg-gray-100 dark:bg-gray-800 p-8 rounded-xl shadow-lg mb-10 border border-gray-300 dark:border-gray-700">
+      <h2 class="text-2xl text-center font-semibold mb-6 text-blue-600 dark:text-blue-300">File Operations</h2>
+      <div class="flex flex-col md:flex-row items-center justify-center gap-6">
+        <label for="fileInput" class="px-6 py-3 rounded-lg font-semibold shadow-md transition-all duration-200 ease-in-out bg-gray-300 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-black dark:text-white cursor-pointer">
+          Load .ini File
+          <input type="file" id="fileInput" accept=".ini" class="hidden">
+        </label>
+        <button id="createDefaultBtn" class="px-6 py-3 rounded-lg font-semibold shadow-md transition-all duration-200 ease-in-out bg-blue-600 hover:bg-blue-700 text-white">Create New Default File</button>
+        <button id="saveFileBtn" class="px-6 py-3 rounded-lg font-semibold shadow-md transition-all duration-200 ease-in-out disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed bg-blue-600 hover:bg-blue-700 text-white" disabled>Save .ini File</button>
+      </div>
+      <p id="fileNameDisplay" class="text-center mt-4 text-gray-600 dark:text-gray-400"></p>
+    </div>
+
+    <div class="flex flex-col md:flex-row gap-8">
+      <div id="settingsEditor" class="hidden bg-gray-100 dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700 md:w-1/2">
+        <h2 class="text-2xl font-semibold mb-6 text-blue-600 dark:text-blue-300">Edit Settings</h2>
+        <div id="settingsGrid" class="grid grid-cols-1 gap-8">
+          <!-- Settings will be dynamically loaded here -->
+        </div>
+      </div>
+
+      <div id="iniPreviewSection" class="hidden bg-gray-100 dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700 md:w-1/2">
+        <h2 class="text-2xl font-semibold mb-6 text-blue-600 dark:text-blue-300">Generated .ini File Preview</h2>
+        <textarea id="iniOutput" class="input-field w-full h-[2400px] font-mono text-sm resize-none bg-white dark:bg-gray-900 text-black dark:text-white" readonly></textarea>
+        <button id="copyIniBtn" class="px-6 py-3 rounded-lg font-semibold shadow-md transition-all duration-200 ease-in-out bg-gray-300 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-black dark:text-white mt-4 w-full">Copy to Clipboard</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="messageModal" class="modal none items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg w-[90%] max-w-[500px] text-center relative">
+      <p id="modalMessage" class="text-xl font-semibold text-gray-800 dark:text-gray-200"></p>
+      <button onclick="closeMessageModal()" class="px-6 py-3 rounded-lg font-semibold shadow-md transition-all duration-200 ease-in-out bg-blue-600 hover:bg-blue-700 text-white mt-6">OK</button>
+    </div>
+  </div>
+
+  <script src="PalworldSettingseditor.js"></script>
+</body>
+</html>
